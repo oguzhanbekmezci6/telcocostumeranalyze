@@ -1,0 +1,79 @@
+import subprocess
+import sys
+try:
+    import lightgbm as lgb
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "lightgbm"])
+    import lightgbm as lgb
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
+import warnings
+import os
+import kagglehub
+
+warnings.filterwarnings("ignore")
+
+path = kagglehub.dataset_download("blastchar/telco-customer-churn")
+for file in os.listdir(path):
+    if file.endswith(".csv"):
+        csv_path = os.path.join(path, file)
+df = pd.read_csv(csv_path)
+
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
+df = df.drop('customerID', axis=1)
+
+df['tenure_group'] = pd.cut(df['tenure'], bins=[0,12,24,36,48,60,72],
+                            labels=['0-1y','1-2y','2-3y','3-4y','4-5y','5-6y'])
+df['HighMonthlyCharge'] = (df['MonthlyCharges'] > df['MonthlyCharges'].median()).astype(int)
+df['AvgMonthlyCharge'] = df['TotalCharges'] / (df['tenure'] + 1)
+df['RiskyFiber'] = ((df['InternetService'] == 'Fiber optic') &
+                    (df['Contract'] == 'Month-to-month')).astype(int)
+services = ['PhoneService', 'MultipleLines', 'OnlineSecurity', 'OnlineBackup',
+            'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
+df['NumExtraServices'] = (df[services] == 'Yes').sum(axis=1)
+df['SeniorAlone'] = ((df['SeniorCitizen'] == 1) & (df['Partner'] == 'No')).astype(int)
+df['RiskyPayment'] = ((df['PaperlessBilling'] == 'Yes') &
+                      (~df['PaymentMethod'].str.contains('automatic', case=False))).astype(int)
+df['TotalChargesGroup'] = pd.qcut(df['TotalCharges'].fillna(0), q=4, labels=['Low','Medium','High','VeryHigh'])
+
+df['Churn'] = LabelEncoder().fit_transform(df['Churn'])
+df = pd.get_dummies(df, drop_first=True)
+
+X = df.drop('Churn', axis=1)
+y = df['Churn']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+model = lgb.LGBMClassifier(
+    n_estimators=1000,
+    learning_rate=0.01,
+    max_depth=8,
+    num_leaves=64,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    reg_alpha=0.1,
+    reg_lambda=0.1,
+    min_child_samples=20,
+    random_state=42,
+    class_weight='balanced',
+    n_jobs=-1
+)
+
+model.fit(X_train, y_train,
+          eval_set=[(X_test, y_test)],
+          eval_metric='auc',
+          callbacks=[lgb.early_stopping(100, verbose=False)])
+
+y_pred = model.predict(X_test)
+y_proba = model.predict_proba(X_test)[:, 1]
+
+print(f"ACCURACY: {accuracy_score(y_test, y_pred)*100:.2f}%")
+print(f"ROC AUC Score: {roc_auc_score(y_test, y_proba):.4f}")
+print("Classification Report:")
+print(classification_report(y_test, y_pred, target_names=['Kalan', 'Ayrılan']))
