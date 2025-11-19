@@ -2,15 +2,14 @@
 
 ## Proje Özeti (Business Case)
 
-Bu projenin temel amacı, telekomünikasyon sektörüne ait müşteri verilerini kullanarak, bir müşterinin şirketten **ayrılma (churn)** olasılığını yüksek doğrulukla önceden tahmin etmektir. Erken ve doğru tahmin, şirketin yüksek riskli müşterilere **proaktif müdahale stratejileri** uygulamasını ve müşteri kaybından kaynaklanan gelirin azalmasını önlemesini sağlayacaktır.
-
+Projemin temel amacı, telekomünikasyon sektörüne ait müşteri verilerini kullanarak, bir müşterinin şirketten **ayrılma (churn)** olasılığını yüksek doğrulukla önceden tahmin etmektir. 
 ---
 
 ## ⚙️ Metodoloji ve Kullanılan Teknikler
 
-Bu analiz, sadece temel bir modelleme çalışması değil, aynı zamanda **İş Alanı Bilgisi (Domain Knowledge)** ve gelişmiş makine öğrenimi tekniklerini birleştiren bütünsel bir veri bilimi projesidir.
+Bu analizim, sadece temel bir modelleme çalışması değil, aynı zamanda makine öğrenimi tekniklerini birleştiren bütünsel bir veri bilimi projesi oldu .
 
-### 1. Veri Kaynağı ve Ön İşleme
+### 1. Veri
 * **Veri Seti:** Yaygın olarak kullanılan Telco Müşteri Kaybı veri seti 
 * **Kayıp Değer Yönetimi:** `TotalCharges` sütunundaki eksik değerleri (NaN), veri setinin **medyanı** ile doldurdum
 * **Kategorik Dönüşüm:** Tüm kategorik değişkenleri, modelin işleyebileceği formata (`pd.get_dummies`) dönüştürdüm
@@ -29,7 +28,7 @@ Modelin tahmin gücünü artırmak için 8 yeni özellik oluşturdum :
 
 ---
 
-## Model Sonuçları ve İş Çıkarımları
+## Model Sonuçları
 
 Model, projenin hedefini karşılayan güçlü bir performans sergiledi .
 
