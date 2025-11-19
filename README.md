@@ -15,7 +15,7 @@ Bu analiz, sadece temel bir modelleme çalışması değil, aynı zamanda **İş
 * **Kayıp Değer Yönetimi:** `TotalCharges` sütunundaki eksik değerler (NaN), veri setinin **medyanı** ile doldurularak modelleme sürecine hazır hale getirilmiştir.
 * **Kategorik Dönüşüm:** Tüm kategorik değişkenler, modelin işleyebileceği formata (`pd.get_dummies`) dönüştürülmüştür.
 
-### 2. İleri Düzey Öznitelik Mühendisliği (Feature Engineering)
+### 2. Mühendislik 
 Modelin tahmin gücünü artırmak ve iş dünyası için anlamlı sinyaller üretmek amacıyla 8 yeni özellik oluşturulmuştur:
 * `AvgMonthlyCharge`: Müşterinin ortalama aylık harcaması (`TotalCharges` / `tenure`).
 * `RiskyPayment`: Kağıtsız fatura kullanan ancak otomatik ödeme yapmayan müşteriler (yüksek riskli ödeme davranışı).
